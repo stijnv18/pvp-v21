@@ -1,3 +1,5 @@
+from mimetypes import init
+from turtle import position
 import pygame
 from pygame.locals import *
 import sys
@@ -60,7 +62,7 @@ class Player2(pygame.sprite.Sprite):
         self.vel = vec(0,0)
         self.acc = vec(0,0)
  
-    def moveplayer2(self):
+    def moveplayer2(self,pewpew):
         self.acc = vec(0,0)
 
         pressed_keys = pygame.key.get_pressed()            
@@ -68,6 +70,9 @@ class Player2(pygame.sprite.Sprite):
             self.acc.x = -ACC
         if pressed_keys[K_RIGHT]:
             self.acc.x = ACC
+        if pressed_keys[K_SPACE]:
+            if len(pewpew) < 10:
+                pewpew.append(shoot(self.pos,True))
                 
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
@@ -92,26 +97,45 @@ class platform(pygame.sprite.Sprite):
         self.surf = pygame.Surface((WIDTH, 20))
         self.surf.fill((255,0,0))
         self.rect = self.surf.get_rect(center = (WIDTH/2, HEIGHT - 10))
- 
+
+class shoot(object): ##### sprite rendering
+    def __init__(self,poss,facing):
+        super().__init__() 
+        self.poss =poss
+        self.facing = facing
+        self.vel = 10
+    def draw(self):
+        super().draw() 
+        self.surf = pygame.Surface((self.poss[0], self.poss[1]))#36,27
+        self.surf.fill((128,255,40))
+        self.rect = self.surf.get_rect()
+
 PT1 = platform()
 P1 = Player1()
 P2 = Player2()
- 
+sh = shoot()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(PT1)
 all_sprites.add(P2)
 all_sprites.add(P1)
- 
+all_sprites.add(sh)
+pewpew = []
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-     
+    for pew in pewpew:
+        print(pew)
+        if pew.poss[0] <500 and pew.poss[0]>0:
+            pew.poss[1]+=pew.vel
+        else:
+            pewpew.pop(pewpew.index(pew))
+
     displaysurface.fill((0,0,0))
  
     P1.moveplayer1()
-    P2.moveplayer2()
+    P2.moveplayer2(pewpew)
     for entity in all_sprites:
         displaysurface.blit(entity.surf, entity.rect)
     

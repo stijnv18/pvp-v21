@@ -1,2 +1,2 @@
 
-        pressed_keys = pygame.key.get_pressed()            
+            self.acc.x = -ACC
