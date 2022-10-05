@@ -1,5 +1,5 @@
 from mimetypes import init
-from turtle import position
+from turtle import TurtleScreenBase, position
 import pygame
 from pygame.locals import *
 import sys
@@ -104,16 +104,25 @@ class shoot(object): ##### sprite rendering
         self.poss =poss
         self.facing = facing
         self.vel = 10
-    def draw(self):
-        super().draw() 
-        self.surf = pygame.Surface((self.poss[0], self.poss[1]))#36,27
-        self.surf.fill((128,255,40))
-        self.rect = self.surf.get_rect()
+
+class shootsprite(pygame.sprite.Sprite):
+    def __init__(self,poss):
+        super().__init__()
+        mypos = list(poss.poss)
+        print(mypos)
+        mypos[1]+=10
+        poss.poss = tuple(mypos)
+
+        
+        self.surf = pygame.Surface((poss.poss[0], poss.poss[1]))#36,27
+        self.rect =  pygame.draw.circle(surface=self.surf,color=(255,255,0),center=poss.poss,radius=5)
+        
 
 PT1 = platform()
 P1 = Player1()
 P2 = Player2()
-sh = shoot()
+initpew = shoot((0,100000),True)
+sh = shootsprite(initpew)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(PT1)
 all_sprites.add(P2)
@@ -126,18 +135,23 @@ while True:
             pygame.quit()
             sys.exit()
     for pew in pewpew:
-        print(pew)
-        if pew.poss[0] <500 and pew.poss[0]>0:
-            pew.poss[1]+=pew.vel
+        
+        if pew.poss[1] <500 and pew.poss[1]>0:
+            #pew.poss[1]+=pew.vel
+            sh.__init__(pew)
         else:
             pewpew.pop(pewpew.index(pew))
 
     displaysurface.fill((0,0,0))
- 
+
+    
     P1.moveplayer1()
     P2.moveplayer2(pewpew)
     for entity in all_sprites:
-        displaysurface.blit(entity.surf, entity.rect)
+        try:
+            displaysurface.blit(entity.surf, entity.rect)
+        except AttributeError:
+            print("error")
     
     pygame.display.update()
     FramePerSec.tick(FPS)
