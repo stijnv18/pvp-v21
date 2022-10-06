@@ -1,5 +1,3 @@
-from mimetypes import init
-from turtle import TurtleScreenBase, position
 import pygame
 from pygame.locals import *
 import sys
@@ -115,13 +113,13 @@ class shootsprite(pygame.sprite.Sprite):
 
         
         self.surf = pygame.Surface((poss.poss[0], poss.poss[1]))#36,27
-        self.rect =  pygame.draw.circle(surface=self.surf,color=(255,255,0),center=poss.poss,radius=5)
+        self.circ =  pygame.draw.circle(surface=self.surf,color=(255,0,0),center=poss.poss,radius=5)
         
 
 PT1 = platform()
 P1 = Player1()
 P2 = Player2()
-initpew = shoot((0,100000),True)
+initpew = shoot((100,100000),True)
 sh = shootsprite(initpew)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(PT1)
@@ -151,7 +149,8 @@ while True:
         try:
             displaysurface.blit(entity.surf, entity.rect)
         except AttributeError:
-            print("error")
+            displaysurface.blit(entity.surf, entity.circ)
+
     
     pygame.display.update()
     FramePerSec.tick(FPS)

@@ -1,12 +1,13 @@
+from queue import Empty
 import pygame
 from pygame.locals import *
 import sys
- 
+import time
 pygame.init()
  
 vec = pygame.math.Vector2 
-HEIGHT = 450
-WIDTH = 400
+HEIGHT = 800
+WIDTH = 800
 ACC = 0.5
 FRIC = -0.12
 FPS = 60
@@ -80,7 +81,7 @@ class Player2(pygame.sprite.Sprite):
  
 	def moveplayer2(self,pewpew):
 		self.acc = vec(0,0)
-
+		global timelastfire
 		pressed_keys = pygame.key.get_pressed()            
 		if pressed_keys[K_LEFT]:
 			self.acc.x = -ACC
@@ -88,8 +89,21 @@ class Player2(pygame.sprite.Sprite):
 			self.acc.x = ACC
 		if pressed_keys[K_SPACE]:
 			if len(pewpew) < 10:
-				pewpew.append(shoot(self.pos,True))
-				
+			
+				if time.time()-timelastfire>0.5:
+					timelastfire = time.time()
+					pewpew.append(shoot(self.pos,True))
+					pewpewpew.append(shootsprite(shoot(self.pos,True)))
+			else:
+
+				if time.time()-timelastfire>0.5:
+					timelastfire = time.time()
+					for pew in pewpew: 
+						if pew.poss[1] >HEIGHT and pew.poss[1]>0:
+							
+							pew.poss=self.pos
+							break
+			
 		self.acc.x += self.vel.x * FRIC
 		self.vel += self.acc
 		self.pos += self.vel + 0.5 * self.acc
@@ -113,47 +127,83 @@ class shootsprite(pygame.sprite.Sprite):
 	def __init__(self,poss):
 		super().__init__()
 		mypos = list(poss.poss)
-		print(mypos)
 		mypos[1]+=10
+		mypos[1]=round(mypos[1],0)
 		poss.poss = tuple(mypos)
 
 		bullet = pygame.image.load('p1crab.png')
 		bullet = pygame.transform.scale(bullet,(WSCALED,HSCALED))
-		self.surf = pygame.Surface((poss.poss[0], poss.poss[1]),SRCALPHA)#36,27
-		self.surf.blit(bullet,(0,0))
-		self.rect = self.surf.get_rect()
+
+		self.surf = pygame.Surface((WIDTH,HEIGHT),SRCALPHA)#36,27
+		self.surf.blit(bullet,poss.poss)
+		self.rect = self.surf.get_rect() 
 		# self.rect =  pygame.draw.circle(surface=self.surf,color=(255,255,0),center=poss.poss,radius=5)
-		
+
+
+
 
 P1 = Player1()
 P2 = Player2()
-initpew = shoot((0,100000),True)
+initpew = shoot((1000,10),True)
 sh = shootsprite(initpew)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(P2)
 all_sprites.add(P1)
-all_sprites.add(sh)
+#all_sprites.add(sh)
 pewpew = []
+pewpewpew=[]
+timelastfire = 0 
+remove =[]
 while True:
+
+	pewpewpewpew=[pewpew,pewpewpew]
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			pygame.quit()
 			sys.exit()
-	for pew in pewpew:
-		
-		if pew.poss[1] <500 and pew.poss[1]>0:
-			#pew.poss[1]+=pew.vel
-			sh.__init__(pew)
+   
+	for i in range(0,len(pewpewpew)):
+		pass
+		#print(pewpew[i].poss[1])
+	for i in range(0,len(pewpewpew)):
+		if len(pewpew)==2:
+			pass
+		if pewpew[i].poss[1] <HEIGHT and pewpew[i].poss[1]>0:
+			pewpewpew[i].__init__(pewpew[i])        
 		else:
-			pewpew.pop(pewpew.index(pew))
+			remove.append(i)
+		#  print(len(pewpew))
+		#print(pewpew[i].poss)
+	for re in remove:
+		if False:
+			pewpew.pop(pewpew.index(pewpew[re]))
+			print(all_sprites.sprites())
+			#all_sprites.remove(pewpewpew[re])
+			pewpewpew.pop(pewpewpew.index(pewpewpew[re]))
+			remove.pop(remove.index(re))
 
+	if False:
+		for sprit in pewpewpew:
+			for pew in pewpew:   
+				if pew.poss[1] <HEIGHT and pew.poss[1]>0:
+				#pew.poss[1]+=pew.vel
+					sprit.__init__(pew)
+
+			else:
+				pewpew.pop(pewpew.index(pew))
+				all_sprites.remove(sprit)
+				pewpewpew.pop(pewpewpew.index(sprit))
+	for sprite in pewpewpew:
+		all_sprites.add(sprite)
 	displaysurface.fill((255,255,255))
 	displaysurface.blit(pygame.transform.smoothscale(bg,(displaysurface.get_size())),(0,0))	
 
 	
 	P1.moveplayer1()
 	P2.moveplayer2(pewpew)
+	#print(all_sprites.sprites())
 	for entity in all_sprites:
+
 		try:
 			displaysurface.blit(entity.surf, entity.rect)
 		except AttributeError:
