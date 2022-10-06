@@ -11,10 +11,14 @@ WIDTH = 800
 ACC = 0.5
 FRIC = -0.12
 FPS = 60
+BX=8/400
+BY=15/450
 PHEIGHT = 27
 PWIDTH = 36
 PSCALEH = 27 / 450
 PSCALEW = 36 / 400
+BXSCALE= BX * WIDTH
+BYSCALE = BY * HEIGHT
 WSCALED = PSCALEW*WIDTH
 HSCALED = PSCALEH*HEIGHT
 P2SCALE = 40 / 450
@@ -131,8 +135,8 @@ class shootsprite(pygame.sprite.Sprite):
 		mypos[1]=round(mypos[1],0)
 		poss.poss = tuple(mypos)
 
-		bullet = pygame.image.load('p1crab.png')
-		bullet = pygame.transform.scale(bullet,(WSCALED,HSCALED))
+		bullet = pygame.image.load('projectiel2.png')
+		bullet = pygame.transform.scale(bullet,(BXSCALE,BYSCALE))
 
 		self.surf = pygame.Surface((WIDTH,HEIGHT),SRCALPHA)#36,27
 		self.surf.blit(bullet,poss.poss)
@@ -174,25 +178,7 @@ while True:
 			remove.append(i)
 		#  print(len(pewpew))
 		#print(pewpew[i].poss)
-	for re in remove:
-		if False:
-			pewpew.pop(pewpew.index(pewpew[re]))
-			print(all_sprites.sprites())
-			#all_sprites.remove(pewpewpew[re])
-			pewpewpew.pop(pewpewpew.index(pewpewpew[re]))
-			remove.pop(remove.index(re))
-
-	if False:
-		for sprit in pewpewpew:
-			for pew in pewpew:   
-				if pew.poss[1] <HEIGHT and pew.poss[1]>0:
-				#pew.poss[1]+=pew.vel
-					sprit.__init__(pew)
-
-			else:
-				pewpew.pop(pewpew.index(pew))
-				all_sprites.remove(sprit)
-				pewpewpew.pop(pewpewpew.index(sprit))
+	
 	for sprite in pewpewpew:
 		all_sprites.add(sprite)
 	displaysurface.fill((255,255,255))
