@@ -1,2 +1,1 @@
-
-            self.acc.x = -ACC
+HEIGHT
