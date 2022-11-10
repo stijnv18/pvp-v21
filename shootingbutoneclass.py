@@ -21,14 +21,14 @@ BXSCALE= BX * WIDTH
 BYSCALE = BY * HEIGHT
 WSCALED = PSCALEW*WIDTH
 HSCALED = PSCALEH*HEIGHT
-P2SCALE = 40 / 450
-P1SCALE = 440 / 450
+P2SCALE = 50 / 450
+P1SCALE = 430 / 450
 P1SCALED = P1SCALE * HEIGHT
 P2SCALED = P2SCALE * HEIGHT
 FramePerSec = pygame.time.Clock()
 
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))
-bg = pygame.image.load('background.jpg').convert()
+bg = pygame.image.load('crabbackground.png').convert()
 pygame.display.set_caption("Game")
 icon = pygame.image.load('p1crab.png').convert()
 icon = pygame.transform.scale(icon,(23,32))
@@ -52,6 +52,8 @@ class Player1(pygame.sprite.Sprite):
 
 		pressed_keys = pygame.key.get_pressed()            
 		if pressed_keys[K_q]:
+			self.acc.x = -ACC
+		if pressed_keys[K_a]:
 			self.acc.x = -ACC
 		if pressed_keys[K_d]:
 			self.acc.x = ACC
