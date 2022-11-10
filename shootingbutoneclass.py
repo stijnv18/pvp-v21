@@ -62,10 +62,10 @@ class Player1(pygame.sprite.Sprite):
 		self.vel += self.acc
 		self.pos += self.vel + 0.5 * self.acc
 			
-		if self.pos.x > WIDTH:
-			self.pos.x = 0
-		if self.pos.x < 0:
-			self.pos.x = WIDTH
+		if self.pos.x > WIDTH-WSCALED-10:
+			self.pos.x = WIDTH-WSCALED-10
+		if self.pos.x < 0+WSCALED+10:
+			self.pos.x = 0+WSCALED+10
 			
 		self.rect.midbottom = self.pos    
  
@@ -114,10 +114,10 @@ class Player2(pygame.sprite.Sprite):
 		self.vel += self.acc
 		self.pos += self.vel + 0.5 * self.acc
 			
-		if self.pos.x > WIDTH:
-			self.pos.x = 0
-		if self.pos.x < 0:
-			self.pos.x = WIDTH
+		if self.pos.x > WIDTH-WSCALED-10:
+			self.pos.x = WIDTH-WSCALED-10
+		if self.pos.x < 0+WSCALED+10:
+			self.pos.x = 0+WSCALED+10
 			
 		self.rect.midbottom = self.pos    
 
