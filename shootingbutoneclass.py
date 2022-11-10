@@ -25,10 +25,15 @@ P2SCALE = 50 / 450
 P1SCALE = 430 / 450
 P1SCALED = P1SCALE * HEIGHT
 P2SCALED = P2SCALE * HEIGHT
+HPSCALEDW = 64 / 192 * WIDTH * 0.7
+HPSCALEDH = 9 / 192 * WIDTH * 0.7
 FramePerSec = pygame.time.Clock()
 
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))
 bg = pygame.image.load('crabbackground.png').convert()
+HPplayer1 = pygame.image.load('groenbar.png')
+HPplayer1 = pygame.transform.flip(HPplayer1,True,True)
+HPplayer2 = pygame.image.load('groenbar.png')
 pygame.display.set_caption("Game")
 icon = pygame.image.load('p1crab.png').convert()
 icon = pygame.transform.scale(icon,(23,32))
@@ -175,7 +180,7 @@ while True:
 
 	for i in range(0,len(pewpewpew)):
 
-		print(pewpewpew[i].facing)
+		# print(pewpewpew[i].facing)
 		if pewpewpew[i].poss[1] <HEIGHT and pewpewpew[i].poss[1]>0:
 			pewpewpew[i].__init__((pewpewpew[i].poss[0],pewpewpew[i].poss[1]+10),pewpewpew[i].facing)
 			pass       
@@ -186,7 +191,8 @@ while True:
 		all_sprites.add(sprite)
 	displaysurface.fill((255,255,255))
 	displaysurface.blit(pygame.transform.smoothscale(bg,(displaysurface.get_size())),(0,0))	
-
+	displaysurface.blit(pygame.transform.smoothscale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,0))
+	displaysurface.blit(pygame.transform.smoothscale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT-25))
 	
 	P1.moveplayer1()
 	P2.moveplayer2(pewpewpew)
