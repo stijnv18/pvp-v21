@@ -32,7 +32,6 @@ REDSCALEH = 7 / 192 * HEIGHT * 0.7
 
 FramePerSec = pygame.time.Clock()
 
-# transparent = (0,0,0,0)
 visible = (0,0,0,100)
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))
 bg = pygame.image.load('crabbackground.png').convert()
@@ -49,9 +48,6 @@ pygame.display.set_icon(icon)
 cd3=pygame.image.load('3.png')
 cd2=pygame.image.load('2.png')
 cd1=pygame.image.load('1.png')
-# cd1.fill(transparent)
-# cd2.fill(transparent)
-# cd3.fill(transparent)
 
  
 class Player1(pygame.sprite.Sprite):
@@ -73,13 +69,11 @@ class Player1(pygame.sprite.Sprite):
 		global timelastfireforplayer2
 		pressed_keys = pygame.key.get_pressed()     
 		if self.active == True:       
-			if pressed_keys[K_q]:
-				self.acc.x = -ACC
-			if pressed_keys[K_a]:
+			if pressed_keys[K_q] or pressed_keys[K_a]:
 				self.acc.x = -ACC
 			if pressed_keys[K_d]:
 				self.acc.x = ACC
-			if pressed_keys[K_z]:
+			if pressed_keys[K_z] or pressed_keys[K_w]:
 				if time.time()-timelastfireforplayer2>0.05:
 					timelastfireforplayer2 = time.time()
 					updateposbulletlist=list(self.pos)
@@ -96,12 +90,7 @@ class Player1(pygame.sprite.Sprite):
 		if self.pos.x < 0+WSCALED+10: 
 			self.pos.x = 0+WSCALED+10
 			
-		self.rect.midbottom = self.pos    
- 
-#	def hitplayer(self,sp,bul): 
-#		for x in bul:
-#			col =  pygame.sprite.collide_mask(sp,x)
-#			print(col)
+		self.rect.midbottom = self.pos
 
 class Player2(pygame.sprite.Sprite):
 	def __init__(self):
@@ -135,7 +124,6 @@ class Player2(pygame.sprite.Sprite):
 						updateposbulletlist[0]=updateposbulletlist[0]-(BXSCALE/2)
 						updateposbulletlist=tuple(updateposbulletlist)
 						pewpewpew.append(shootsprite(updateposbulletlist,True))
-						#pewpewpew.append(shootsprite(self.pos,True))
 
 			self.acc.x += self.vel.x * FRIC
 			self.vel += self.acc
@@ -164,7 +152,6 @@ class shootsprite(pygame.sprite.Sprite):
 			mypos = list(poss)
 			mypos[1]+=10
 			mypos[1]=round(mypos[1],0)
-			#mypos[0]=mypos[0]-(36/2)
 			poss = tuple(mypos)
 			self.poss = poss
 			self.bullet = pygame.image.load('projectiel2.png').convert_alpha()
@@ -238,22 +225,13 @@ def hit1(player):
 def start(): # 3,2,1 afbeeldingen laten zien en dan movement/schieten unlocken
 	global timecdstart 
 	if time.time() - timecdstart < 1:
-		# displaysurface.blit(cd3,(480*REDSCALEW,HEIGHT-26))
-		print('3')
-	#cd1.fill(visible)
-	#cd1.fill(transparent)
+		displaysurface.blit(cd3,(350,350))
+	if time.time() - timecdstart > 1 and time.time() - timecdstart < 2:
+		displaysurface.blit(cd2,(350,350))
 	if time.time() - timecdstart > 2 and time.time() - timecdstart < 3:
-		displaysurface.blit(cd2,(480*REDSCALEW,HEIGHT-26))
-		print('2')
-	# cd2.fill(visible)
-	# cd2.fill(transparent)
-	if time.time() - timecdstart > 3 and time.time() - timecdstart < 4:
-		displaysurface.blit(cd1,(480*REDSCALEW,HEIGHT-26))
-		print('1')
+		displaysurface.blit(cd1,(350,350))
 		P1.active = True
 		P2.active = True
-	# cd3.fill(visible)
-	# cd3.fill(transparent)
 	
 
 
@@ -350,9 +328,6 @@ while True:
 			displaysurface.blit(entity.surf, entity.rect)
 		except AttributeError:
 			print("error")
-   
+	start()
 	pygame.display.update()
 	FramePerSec.tick(FPS)
-	
-
-	start()
