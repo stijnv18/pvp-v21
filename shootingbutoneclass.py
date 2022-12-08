@@ -25,10 +25,21 @@ P2SCALE = 50 / 450
 P1SCALE = 430 / 450
 P1SCALED = P1SCALE * HEIGHT
 P2SCALED = P2SCALE * HEIGHT
+HPSCALEDW = 64 / 192 * WIDTH * 0.7
+HPSCALEDH = 9 / 192 * HEIGHT * 0.7
+REDSCALEW = 4 / 192 * WIDTH * 0.7
+REDSCALEH = 7 / 192 * HEIGHT * 0.7
+
 FramePerSec = pygame.time.Clock()
 
 displaysurface = pygame.display.set_mode((WIDTH, HEIGHT))
 bg = pygame.image.load('crabbackground.png').convert()
+HPplayer1 = pygame.image.load('groenbar.png')
+HPplayer1 = pygame.transform.flip(HPplayer1,True,True)
+HPplayer2 = pygame.image.load('groenbar.png')
+HPn = pygame.image.load('roodblokje.png')
+HPn2 = pygame.image.load('roodblokje.png')
+HPn2 = pygame.transform.flip(HPn2,True,True)
 pygame.display.set_caption("Game")
 icon = pygame.image.load('p1crab.png').convert()
 icon = pygame.transform.scale(icon,(23,32))
@@ -196,6 +207,24 @@ def checkplayerhit(player,list):
 	return False
 
 
+def hit1(player):
+	while player == 1:
+		for i in range(0,hp1):
+			displaysurface.blit(pygame.transform.smoothscale(HPn,(REDSCALEW+1,REDSCALEH)), (480-i*REDSCALEW,HEIGHT-26))
+		hp1 += 1
+		while hp1 == 13:
+			return 2
+		break
+	while player == 2:
+		for i in range(0,hp2):
+			displaysurface.blit(pygame.transform.smoothscale(HPn2,(REDSCALEW+1,REDSCALEH)),(320+i*REDSCALEW,30))
+		hp2 += 1
+		while hp2 == 13:
+			
+			return 1
+		break
+		 
+	
 P1 = Player1()
 P2 = Player2()
 
@@ -209,6 +238,9 @@ pewpewpew=[]
 timelastfire = 0 
 timelastfireforplayer2 = 0
 remove =[]
+hp1 = 0
+hp2 = 0
+
 while True:
 
 
@@ -221,7 +253,7 @@ while True:
 	for i in range(0,len(pewpewpew)):
 		if pewpewpew[i].poss[1] <800 and pewpewpew[i].poss[1]>0:
 			pewpewpew[i].__init__((pewpewpew[i].poss[0],pewpewpew[i].poss[1]),pewpewpew[i].facing)
-			     
+				 
 		else:
 			remove.append(pewpewpew[i])
 	for rem in remove:
@@ -235,7 +267,9 @@ while True:
 		all_sprites.add(sprite)
 	displaysurface.fill((255,255,255))
 	displaysurface.blit(pygame.transform.smoothscale(bg,(displaysurface.get_size())),(0,0))	
-
+	displaysurface.blit(pygame.transform.smoothscale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,30))
+	displaysurface.blit(pygame.transform.smoothscale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT-30))
+	
 	
 	P1.moveplayer1(pewpewpew)
 	P2.moveplayer2(pewpewpew)
@@ -271,7 +305,7 @@ while True:
 			displaysurface.blit(entity.surf, entity.rect)
 		except AttributeError:
 			print("error")
-	
+   
 	pygame.display.update()
 	FramePerSec.tick(FPS)
 	
