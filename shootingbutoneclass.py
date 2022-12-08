@@ -57,7 +57,7 @@ class Player1(pygame.sprite.Sprite):
 		self.pos = vec((WIDTH/2, P1SCALED))
 		self.vel = vec(0,0)
 		self.acc = vec(0,0)
- 
+		self.hp = 0
 	def moveplayer1(self,pewpewpew):
 		self.acc = vec(0,0)
 		global timelastfireforplayer2
@@ -104,7 +104,7 @@ class Player2(pygame.sprite.Sprite):
 		self.pos = vec((WIDTH/2, P2SCALED))
 		self.vel = vec(0,0)
 		self.acc = vec(0,0)
- 
+		self.hp = 0
 	def moveplayer2(self,pewpewpew):
 
 
@@ -209,17 +209,17 @@ def checkplayerhit(player,list):
 
 def hit1(player):
 	while player == 1:
-		for i in range(0,hp1):
+		for i in range(0,P1.hp):
 			displaysurface.blit(pygame.transform.smoothscale(HPn,(REDSCALEW+1,REDSCALEH)), (480-i*REDSCALEW,HEIGHT-26))
-		hp1 += 1
-		while hp1 == 13:
+		P1.hp += 1
+		while P1.hp == 13:
 			return 2
 		break
 	while player == 2:
-		for i in range(0,hp2):
+		for i in range(0,P2.hp):
 			displaysurface.blit(pygame.transform.smoothscale(HPn2,(REDSCALEW+1,REDSCALEH)),(320+i*REDSCALEW,30))
-		hp2 += 1
-		while hp2 == 13:
+		P2.hp += 1
+		while P2.hp == 13:
 			
 			return 1
 		break
@@ -267,7 +267,7 @@ while True:
 		all_sprites.add(sprite)
 	displaysurface.fill((255,255,255))
 	displaysurface.blit(pygame.transform.smoothscale(bg,(displaysurface.get_size())),(0,0))	
-	displaysurface.blit(pygame.transform.smoothscale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,30))
+	displaysurface.blit(pygame.transform.smoothscale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,5))
 	displaysurface.blit(pygame.transform.smoothscale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT-30))
 	
 	
