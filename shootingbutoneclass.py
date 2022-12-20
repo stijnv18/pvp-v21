@@ -11,24 +11,26 @@ WIDTH = 800
 ACC = 0.5
 FRIC = -0.12
 FPS = 60
-BX=8/400
-BY=15/450
+BX = 8 / 400
+BY = 15 / 450
 PHEIGHT = 27
 PWIDTH = 36
 PSCALEH = 27 / 450
 PSCALEW = 36 / 400
 BXSCALE= BX * WIDTH		  #width bullet scaled
 BYSCALE = BY * HEIGHT	  #height bullet scaled
-WSCALED = PSCALEW*WIDTH   #width player scaled
-HSCALED = PSCALEH*HEIGHT  #heigt palyer scaled
+WSCALED = PSCALEW * WIDTH   #width player scaled
+HSCALED = PSCALEH * HEIGHT  #heigt palyer scaled
 P2SCALE = 50 / 450
 P1SCALE = 430 / 450
 P1SCALED = P1SCALE * HEIGHT
 P2SCALED = P2SCALE * HEIGHT
-HPSCALEDW = 64 / 192 * WIDTH * 0.7
-HPSCALEDH = 9 / 192 * HEIGHT * 0.7
-REDSCALEW = 4 / 192 * WIDTH * 0.7
-REDSCALEH = 7 / 192 * HEIGHT * 0.7
+HPSCALEDW = 64 / 192 * WIDTH
+HPSCALEDH = 9 / 192 * HEIGHT
+REDSCALEW = 4 / 192 * WIDTH
+REDSCALEH = 7 / 192 * HEIGHT 
+CDSCALEW = 66 / 192 * WIDTH
+CDSCALEH = 40 / 192 * HEIGHT
 
 FramePerSec = pygame.time.Clock()
 
@@ -47,13 +49,11 @@ pygame.display.set_icon(icon)
 cd3=pygame.image.load('3.png')
 cd2=pygame.image.load('2.png')
 cd1=pygame.image.load('1.png')
-CDSCALEW = 66/ 192 * WIDTH 
-CDSCALEH = 40/ 192*HEIGHT
  
 class Player1(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__() 
-		self.player = pygame.image.load('p1crab.png').convert_alpha()
+		self.player = pygame.image.load('p1crab.png')
 		self.player = pygame.transform.scale(self.player,(WSCALED,HSCALED))
 		self.surf = pygame.Surface((WSCALED, HSCALED),SRCALPHA)
 		self.surf.blit(self.player,(0,0))
@@ -63,21 +63,23 @@ class Player1(pygame.sprite.Sprite):
 		self.vel = vec(0,0)
 		self.acc = vec(0,0)
 		self.hp = 0
+		self.active = False
 	def moveplayer1(self,pewpewpew):
 		self.acc = vec(0,0)
 		global timelastfireforplayer2
-		pressed_keys = pygame.key.get_pressed()            
-		if pressed_keys[K_q and K_a]:
-			self.acc.x = -ACC
-		if pressed_keys[K_d]:
-			self.acc.x = ACC
-		if pressed_keys[K_w and K_z]:
-			if time.time()-timelastfireforplayer2>0.05:
-				timelastfireforplayer2 = time.time()
-				updateposbulletlist=list(self.pos)
-				updateposbulletlist[0]=updateposbulletlist[0]-(BXSCALE/2)
-				updateposbulletlist=tuple(updateposbulletlist)
-				pewpewpew.append(shootsprite(updateposbulletlist,False))
+		pressed_keys = pygame.key.get_pressed()
+		if self.active == True:            
+			if pressed_keys[K_q and K_a]:
+				self.acc.x = -ACC
+			if pressed_keys[K_d]:
+				self.acc.x = ACC
+			if pressed_keys[K_w and K_z]:
+				if time.time()-timelastfireforplayer2>0.05:
+					timelastfireforplayer2 = time.time()
+					updateposbulletlist=list(self.pos)
+					updateposbulletlist[0]=updateposbulletlist[0]-(BXSCALE/2)
+					updateposbulletlist=tuple(updateposbulletlist)
+					pewpewpew.append(shootsprite(updateposbulletlist,False))
 
 		self.acc.x += self.vel.x * FRIC
 		self.vel += self.acc
@@ -98,7 +100,7 @@ class Player1(pygame.sprite.Sprite):
 class Player2(pygame.sprite.Sprite):
 	def __init__(self):
 		super().__init__() 
-		player = pygame.image.load('p2crab.png').convert_alpha()
+		player = pygame.image.load('p2crab.png')
 		player = pygame.transform.scale(player,(WSCALED,HSCALED))
 		self.surf = pygame.Surface((WSCALED, HSCALED),SRCALPHA)
 		self.surf.blit(player,(0,0))
@@ -108,26 +110,28 @@ class Player2(pygame.sprite.Sprite):
 		self.vel = vec(0,0)
 		self.acc = vec(0,0)
 		self.hp = 0
+		self.active = False
 	def moveplayer2(self,pewpewpew):
 
 
 
 		self.acc = vec(0,0)
 		global timelastfire
-		pressed_keys = pygame.key.get_pressed()            
-		if pressed_keys[K_LEFT]:
-			self.acc.x = -ACC
-		if pressed_keys[K_RIGHT]:
-			self.acc.x = ACC
-		if pressed_keys[K_SPACE]:
-			
-			if time.time()-timelastfire>0.05:
-				timelastfire = time.time()
-				updateposbulletlist=list(self.pos)
-				updateposbulletlist[0]=updateposbulletlist[0]-(BXSCALE/2)
-				updateposbulletlist=tuple(updateposbulletlist)
-				pewpewpew.append(shootsprite(updateposbulletlist,True))
-				#pewpewpew.append(shootsprite(self.pos,True))
+		pressed_keys = pygame.key.get_pressed()
+		if self.active == True:
+			if pressed_keys[K_LEFT]:
+				self.acc.x = -ACC
+			if pressed_keys[K_RIGHT]:
+				self.acc.x = ACC
+			if pressed_keys[K_SPACE]:
+				
+				if time.time()-timelastfire>0.05:
+					timelastfire = time.time()
+					updateposbulletlist=list(self.pos)
+					updateposbulletlist[0]=updateposbulletlist[0]-(BXSCALE/2)
+					updateposbulletlist=tuple(updateposbulletlist)
+					pewpewpew.append(shootsprite(updateposbulletlist,True))
+					#pewpewpew.append(shootsprite(self.pos,True))
 
 		self.acc.x += self.vel.x * FRIC
 		self.vel += self.acc
@@ -156,7 +160,7 @@ class shootsprite(pygame.sprite.Sprite):
 			#mypos[0]=mypos[0]-(36/2)
 			poss = tuple(mypos)
 			self.poss = poss
-			self.bullet = pygame.image.load('projectiel2.png').convert_alpha()
+			self.bullet = pygame.image.load('projectiel2.png')
 			self.bullet = pygame.transform.scale(self.bullet,(BXSCALE,BYSCALE))
 
 			self.surf = pygame.Surface((WIDTH,HEIGHT),SRCALPHA)#36,27
@@ -171,10 +175,10 @@ class shootsprite(pygame.sprite.Sprite):
 			if poss[1] < 0:
 				self.kill()
 			else:	
-				self.bullet = pygame.image.load('projectiel1.png').convert_alpha()
+				self.bullet = pygame.image.load('projectiel1.png')
 				self.bullet = pygame.transform.scale(self.bullet,(BXSCALE,BYSCALE))
 
-				self.surf = pygame.Surface((WIDTH,HEIGHT),SRCALPHA )#36,27
+				self.surf = pygame.Surface((WIDTH,HEIGHT),SRCALPHA)#36,27
 				self.surf.blit(self.bullet,poss)
 				self.rect = self.surf.get_rect() 
 
@@ -186,10 +190,6 @@ def checkplayerhit(player,list):
 
 		playerposx = round(player.pos[0],0)
 		playerposy = round(player.pos[1],0)
-
-		Color = (255,255,255)
-		rect = pygame.Rect((playerposx -(WSCALED/2)),(playerposy -(HSCALED)),WSCALED,HSCALED)
-		pygame.draw.rect(displaysurface,Color,rect,2)
 
 		left = (playerposx -(WSCALED/2))
 		top = (playerposy -(HSCALED))
@@ -217,10 +217,11 @@ def start(): # 3,2,1 afbeeldingen laten zien en dan movement/schieten unlocken
 	global timecdstart 
 	if time.time() - timecdstart < 1:
 		displaysurface.blit(pygame.transform.scale(cd3,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
-	if time.time() - timecdstart > 1 and time.time() - timecdstart < 2:
+	elif time.time() - timecdstart > 1 and time.time() - timecdstart < 2:
 		displaysurface.blit(pygame.transform.scale(cd2,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
-	if time.time() - timecdstart > 2 and time.time() - timecdstart < 3:
+	elif time.time() - timecdstart > 2 and time.time() - timecdstart < 3:
 		displaysurface.blit(pygame.transform.scale(cd1,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
+	else:
 		P1.active = True
 		P2.active = True
 
@@ -243,8 +244,8 @@ timeLasthit= 0
 while True:
 	displaysurface.fill((255,255,255))
 	displaysurface.blit(pygame.transform.scale(bg,(displaysurface.get_size())),(0,0))	
-	displaysurface.blit(pygame.transform.scale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,5))
-	displaysurface.blit(pygame.transform.scale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT-30))
+	displaysurface.blit(pygame.transform.scale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,0))
+	displaysurface.blit(pygame.transform.scale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT- HPSCALEDH))
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			pygame.quit()
@@ -271,11 +272,6 @@ while True:
 	playerposx = round(P1.pos[0],0)
 	playerposy = round(P1.pos[1],0)
 
-
-	Color = (255,0,0)
-	rect = pygame.Rect((playerposx -(WSCALED/2)),(playerposy -(HSCALED)),WSCALED,HSCALED)
-	pygame.draw.rect(displaysurface,Color,rect,2)
-
 	for pew in pewpewpew:
 		bulletposx = round(pew.poss[0],0)
 		bulletposy = round(pew.poss[1],0)
@@ -283,14 +279,13 @@ while True:
 		bulletRight = bulletLeft+BXSCALE
 		bulletTop = (bulletposy)
 		bulletBottem = bulletTop + BYSCALE
-		Color = (255,0,0)
-		rect = pygame.Rect((bulletposx),(bulletposy),BXSCALE,BYSCALE)
-		pygame.draw.rect(displaysurface,Color,rect,2)
 
 	#P1.hitplayer(P1,pewpewpew)
 	## hit player check
 	if checkplayerhit(P2,pewpewpew):
 		hit1(P2)
+	if checkplayerhit(P1,pewpewpew):
+		hit1(P1)
 	for i in range(0,P1.hp):
 		displaysurface.blit(pygame.transform.scale(HPn,(REDSCALEW+1,REDSCALEH)), (480-i*REDSCALEW,HEIGHT-26))
 	for i in range(0,P2.hp):
