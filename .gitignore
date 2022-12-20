@@ -1,4 +1,7 @@
-*.vs-code
-*.git
+# IDE
+.vs/
+.vscode/
+.cache/
 
+# Python
 __pycache__/
