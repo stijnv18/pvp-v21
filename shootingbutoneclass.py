@@ -239,8 +239,6 @@ pewpewpew=[]
 timelastfire = 0 
 timelastfireforplayer2 = 0
 remove =[]
-hp1 = 0
-hp2 = 0
 timeLasthit= 0
 while True:
 
