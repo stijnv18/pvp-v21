@@ -238,12 +238,9 @@ pewpewpew=[]
 timelastfire = 0 
 timelastfireforplayer2 = 0
 remove =[]
-hp1 = 0
-hp2 = 0
 
 while True:
-
-
+    
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			pygame.quit()

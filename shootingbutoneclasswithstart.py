@@ -29,6 +29,8 @@ HPSCALEDW = 64 / 192 * WIDTH * 0.7
 HPSCALEDH = 9 / 192 * HEIGHT * 0.7
 REDSCALEW = 4 / 192 * WIDTH * 0.7
 REDSCALEH = 7 / 192 * HEIGHT * 0.7
+CDSCALEW = 66/ 192 * WIDTH 
+CDSCALEH = 40/ 192*HEIGHT
 
 FramePerSec = pygame.time.Clock()
 
@@ -208,14 +210,14 @@ def checkplayerhit(player,list):
 def hit1(player):
 	while player == 1:
 		for i in range(0,hp1):
-			displaysurface.blit(pygame.transform.smoothscale(HPn,(REDSCALEW+1,REDSCALEH)), (480-i*REDSCALEW,HEIGHT-26))
+			displaysurface.blit(pygame.transform.scale(HPn,(REDSCALEW+1,REDSCALEH)), (480-i*REDSCALEW,HEIGHT-26))
 		hp1 += 1
 		while hp1 == 13:
 			return 2
 		break
 	while player == 2:
 		for i in range(0,hp2):
-			displaysurface.blit(pygame.transform.smoothscale(HPn2,(REDSCALEW+1,REDSCALEH)),(320+i*REDSCALEW,30))
+			displaysurface.blit(pygame.transform.scale(HPn2,(REDSCALEW+1,REDSCALEH)),(320+i*REDSCALEW,30))
 		hp2 += 1
 		while hp2 == 13:
 			
@@ -225,11 +227,12 @@ def hit1(player):
 def start(): # 3,2,1 afbeeldingen laten zien en dan movement/schieten unlocken
 	global timecdstart 
 	if time.time() - timecdstart < 1:
-		displaysurface.blit(cd3,(350,350))
-	if time.time() - timecdstart > 1 and time.time() - timecdstart < 2:
-		displaysurface.blit(cd2,(350,350))
-	if time.time() - timecdstart > 2 and time.time() - timecdstart < 3:
-		displaysurface.blit(cd1,(350,350))
+		displaysurface.blit(pygame.transform.scale(cd3,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
+	elif time.time() - timecdstart > 1 and time.time() - timecdstart < 2:
+		displaysurface.blit(pygame.transform.scale(cd2,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
+	elif time.time() - timecdstart > 2 and time.time() - timecdstart < 3:
+		displaysurface.blit(pygame.transform.scale(cd1,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
+	else:
 		P1.active = True
 		P2.active = True
 	
@@ -244,8 +247,6 @@ def restart(P1,P2): #crabben terug naar originele positie + movement/schieten lo
 	P1.active = False
 	P2.active = False
 	start()
-
-
 
 
 P1 = Player1()
@@ -272,7 +273,6 @@ while True:
 			pygame.quit()
 			sys.exit()
    
-
 	for i in range(0,len(pewpewpew)):
 		if pewpewpew[i].poss[1] <800 and pewpewpew[i].poss[1]>0:
 			pewpewpew[i].__init__((pewpewpew[i].poss[0],pewpewpew[i].poss[1]),pewpewpew[i].facing)
@@ -289,8 +289,8 @@ while True:
 	for sprite in pewpewpew:
 		all_sprites.add(sprite)
 	displaysurface.fill((255,255,255))
-	displaysurface.blit(pygame.transform.smoothscale(bg,(displaysurface.get_size())),(0,0))	
-	displaysurface.blit(pygame.transform.smoothscale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,30))
+	displaysurface.blit(pygame.transform.scale(bg,(displaysurface.get_size())),(0,0))	
+	displaysurface.blit(pygame.transform.smoothscale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,5))
 	displaysurface.blit(pygame.transform.smoothscale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT-30))
 	
 	
