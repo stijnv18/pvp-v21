@@ -44,6 +44,11 @@ pygame.display.set_caption("Game")
 icon = pygame.image.load('p1crab.png').convert()
 icon = pygame.transform.scale(icon,(23,32))
 pygame.display.set_icon(icon)
+cd3=pygame.image.load('3.png')
+cd2=pygame.image.load('2.png')
+cd1=pygame.image.load('1.png')
+CDSCALEW = 66/ 192 * WIDTH 
+CDSCALEH = 40/ 192*HEIGHT
  
 class Player1(pygame.sprite.Sprite):
 	def __init__(self):
@@ -62,13 +67,11 @@ class Player1(pygame.sprite.Sprite):
 		self.acc = vec(0,0)
 		global timelastfireforplayer2
 		pressed_keys = pygame.key.get_pressed()            
-		if pressed_keys[K_q]:
-			self.acc.x = -ACC
-		if pressed_keys[K_a]:
+		if pressed_keys[K_q and K_a]:
 			self.acc.x = -ACC
 		if pressed_keys[K_d]:
 			self.acc.x = ACC
-		if pressed_keys[K_z]:
+		if pressed_keys[K_w and K_z]:
 			if time.time()-timelastfireforplayer2>0.05:
 				timelastfireforplayer2 = time.time()
 				updateposbulletlist=list(self.pos)
@@ -137,9 +140,6 @@ class Player2(pygame.sprite.Sprite):
 			
 		self.rect.midbottom = self.pos    
 
-
-
-
 class shootsprite(pygame.sprite.Sprite):
 	def __init__(self,poss,facing):
 		super().__init__()
@@ -207,25 +207,23 @@ def checkplayerhit(player,list):
 					return True
 	return False
 
+def hit1(p):
+	p.hp += 1
+	while p.hp == 13:
+		return True
+	return False
 
-def hit1(player):
-	while player == 1:
-		for i in range(0,P1.hp):
-			displaysurface.blit(pygame.transform.smoothscale(HPn,(REDSCALEW+1,REDSCALEH)), (480-i*REDSCALEW,HEIGHT-26))
-		P1.hp += 1
-		while P1.hp == 13:
-			return 2
-		break
-	while player == 2:
-		for i in range(0,P2.hp):
-			displaysurface.blit(pygame.transform.smoothscale(HPn2,(REDSCALEW+1,REDSCALEH)),(320+i*REDSCALEW,30))
-		P2.hp += 1
-		while P2.hp == 13:
-			
-			return 1
-		break
-		 
-	
+def start(): # 3,2,1 afbeeldingen laten zien en dan movement/schieten unlocken
+	global timecdstart 
+	if time.time() - timecdstart < 1:
+		displaysurface.blit(pygame.transform.scale(cd3,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
+	if time.time() - timecdstart > 1 and time.time() - timecdstart < 2:
+		displaysurface.blit(pygame.transform.scale(cd2,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
+	if time.time() - timecdstart > 2 and time.time() - timecdstart < 3:
+		displaysurface.blit(pygame.transform.scale(cd1,(CDSCALEW,CDSCALEH)),(displaysurface.get_rect().centerx-CDSCALEW//2,displaysurface.get_rect().centery-CDSCALEH//2))
+		P1.active = True
+		P2.active = True
+
 P1 = Player1()
 P2 = Player2()
 
@@ -239,9 +237,14 @@ pewpewpew=[]
 timelastfire = 0 
 timelastfireforplayer2 = 0
 remove =[]
+timecdstart = time.time()
 timeLasthit= 0
-while True:
 
+while True:
+	displaysurface.fill((255,255,255))
+	displaysurface.blit(pygame.transform.scale(bg,(displaysurface.get_size())),(0,0))	
+	displaysurface.blit(pygame.transform.scale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,5))
+	displaysurface.blit(pygame.transform.scale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT-30))
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			pygame.quit()
@@ -262,12 +265,7 @@ while True:
 
 	for sprite in pewpewpew:
 		all_sprites.add(sprite)
-	displaysurface.fill((255,255,255))
-	displaysurface.blit(pygame.transform.smoothscale(bg,(displaysurface.get_size())),(0,0))	
-	displaysurface.blit(pygame.transform.smoothscale(HPplayer1,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,5))
-	displaysurface.blit(pygame.transform.smoothscale(HPplayer2,(HPSCALEDW,HPSCALEDH)), (displaysurface.get_rect().centerx-HPSCALEDW/2,HEIGHT-30))
-	
-	
+ 
 	P1.moveplayer1(pewpewpew)
 	P2.moveplayer2(pewpewpew)
 	playerposx = round(P1.pos[0],0)
@@ -292,8 +290,11 @@ while True:
 	#P1.hitplayer(P1,pewpewpew)
 	## hit player check
 	if checkplayerhit(P2,pewpewpew):
-		hit1(2)
-
+		hit1(P2)
+	for i in range(0,P1.hp):
+		displaysurface.blit(pygame.transform.scale(HPn,(REDSCALEW+1,REDSCALEH)), (480-i*REDSCALEW,HEIGHT-26))
+	for i in range(0,P2.hp):
+		displaysurface.blit(pygame.transform.scale(HPn2,(REDSCALEW+1,REDSCALEH)),(307+i*REDSCALEW,8))
 
 	all_sprites.add(P2)
 	all_sprites.add(P1) 
@@ -303,7 +304,7 @@ while True:
 			displaysurface.blit(entity.surf, entity.rect)
 		except AttributeError:
 			print("error")
-   
+	start()
 	pygame.display.update()
 	FramePerSec.tick(FPS)
 	
