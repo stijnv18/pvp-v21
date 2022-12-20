@@ -19,7 +19,7 @@ HEALTHBAR_HEIGHT_SCALED = 9 / 192 * HEIGHT * 0.7
 PROJECTILE_WIDTH_SCALED = 8 / 400 * WIDTH
 PROJECTILE_HEIGHT_SCALED = 15 / 450 * HEIGHT
 PROJECTILE_VELOCITY = 15
-
+PLAYER_PROJECTILE_DELAY = 500
 PLAYER_ACCELERATION = 0.5
 PLAYER_FRICTION = 0.12
 
@@ -85,6 +85,7 @@ class Entity:
 class Player(Entity):
 	def __init__(self, id):
 		self.id = id
+		self.last_projectile = 0
 		image = getattr(Images, f"player_{self.id}")
 		position = pygame.math.Vector2(((WIDTH - image.get_width()) // 2, (35 if id == 2 else HEIGHT - image.get_height() - 35)))
 		super().__init__(Entity.Type.PLAYER, image, position)
@@ -107,12 +108,16 @@ class Player(Entity):
 	def move_right(self):
 		self.acceleration.x = PLAYER_ACCELERATION
 
-	def request_fire(self):
-		position = self.position.copy()
-		position.x += self.image.get_width() // 2
-		velocity = pygame.math.Vector2(0, -PROJECTILE_VELOCITY if self.id == 1 else PROJECTILE_VELOCITY)
-		projectile = Projectile(self.id, position, velocity)
-		return projectile
+	def request_projectile(self):
+		if self.last_projectile + PLAYER_PROJECTILE_DELAY < pygame.time.get_ticks():
+			self.last_projectile = pygame.time.get_ticks()
+			position = self.position.copy()
+			position.x += self.image.get_width() // 2
+			velocity = pygame.math.Vector2(0, -PROJECTILE_VELOCITY if self.id == 1 else PROJECTILE_VELOCITY)
+			projectile = Projectile(self.id, position, velocity)
+			return projectile
+		else:
+			return None
 
 class Projectile(Entity):
 	def __init__(self, owner_id, position, velocity):
@@ -152,13 +157,15 @@ while running:
 	if (pressed_keys[pygame.K_d]):
 		game.player1.move_right()
 	if (pressed_keys[pygame.K_z]):
-		game.append_entity(game.player1.request_fire())
+		if (p := game.player1.request_projectile()) is not None:
+			game.append_entity(p)
 	if (pressed_keys[pygame.K_RIGHT]):
 		game.player2.move_left()
 	if (pressed_keys[pygame.K_LEFT]):
 		game.player2.move_right()
 	if (pressed_keys[pygame.K_UP]):
-		game.append_entity(game.player2.request_fire())
+		if (p := game.player2.request_projectile()) is not None:
+			game.append_entity(p)
 
 	surface.blit(Images.background, (0, 0))
 
@@ -173,9 +180,10 @@ while running:
 
 	if Debug.enabled: # debugging shit
 		Debug.new_frame()
-		Debug.draw_info(surface, f"Frames Per Second: {round(clock.get_fps())}")
-		Debug.draw_info(surface, f"Frame Time (deltatime): {round(clock.get_time())}ms")
-		Debug.draw_info(surface, f"Entity Count: {len(game._entities)}")
+		Debug.draw_info(surface, f"FPS: {round(clock.get_fps())}")
+		Debug.draw_info(surface, f"FT (DT): {round(clock.get_time())}ms")
+		Debug.draw_info(surface, f"FCT: {round(clock.get_rawtime())}ms")
+		Debug.draw_info(surface, f"EC: {len(game._entities)}")
 	
 	pygame.display.update()
 	surface.fill((255, 255, 255))
