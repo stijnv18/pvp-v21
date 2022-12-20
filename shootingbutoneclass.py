@@ -180,7 +180,7 @@ class shootsprite(pygame.sprite.Sprite):
 
 def checkplayerhit(player,list):
 	for bullet in list:
-
+		global timeLasthit
 		bulletposx = round(bullet.poss[0],0)
 		bulletposy = round(bullet.poss[1],0)
 
@@ -200,10 +200,11 @@ def checkplayerhit(player,list):
 		bulletRight = bulletLeft+BXSCALE
 		bulletTop = (bulletposy)
 		bulletBottem = bulletTop + BYSCALE
-
-		if(left<=bulletLeft<=right or left<=bulletRight<=right):
-			if(top<=bulletBottem<=bottem or top <bulletTop <=bottem):
-				return True
+		if time.perf_counter()-timeLasthit>0.5:
+			if(left<=bulletLeft<=right or left<=bulletRight<=right):
+				if(top<=bulletBottem<=bottem or top <bulletTop <=bottem):
+					timeLasthit = time.perf_counter()
+					return True
 	return False
 
 
@@ -240,16 +241,14 @@ timelastfireforplayer2 = 0
 remove =[]
 hp1 = 0
 hp2 = 0
-
+timeLasthit= 0
 while True:
-
 
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			pygame.quit()
 			sys.exit()
    
-
 	for i in range(0,len(pewpewpew)):
 		if pewpewpew[i].poss[1] <800 and pewpewpew[i].poss[1]>0:
 			pewpewpew[i].__init__((pewpewpew[i].poss[0],pewpewpew[i].poss[1]),pewpewpew[i].facing)
@@ -294,7 +293,8 @@ while True:
 
 	#P1.hitplayer(P1,pewpewpew)
 	## hit player check
-	checkplayerhit(P2,pewpewpew)
+	if checkplayerhit(P2,pewpewpew):
+		hit1(2)
 
 
 	all_sprites.add(P2)
