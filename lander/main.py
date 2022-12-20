@@ -47,6 +47,11 @@ class Game:
 		self.player2 = Player(2)
 		self._entities = [self.player1, self.player2]
 
+	def get_player_by_id(self, id):
+		for e in self.get_all_entities_of_type(Entity.Type.PLAYER):
+			if e.id == id:
+				return e
+
 	def get_all_entities(self):
 		return self._entities
 
@@ -73,11 +78,6 @@ class Entity:
 
 	def draw(self):
 		surface.blit(self.image, self.position)
-
-	def is_out_of_bounds(self, bounds):
-		x1, y1, x2, y2 = bounds
-		if not (x1 < self.position.x < x2 and y1 < self.position.y < y2):
-			game.delete_entity(self)
 
 	def update(self):
 		pass
@@ -129,18 +129,30 @@ class Projectile(Entity):
 	def update(self):
 		self.position += self.velocity
 
+	def is_out_of_bounds(self, bounds):
+		x1, y1, x2, y2 = bounds
+		if not (x1 < self.position.x < x2 and y1 < self.position.y < y2):
+			game.delete_entity(self)
+
+	def does_collide_with_player(self, player):
+		return player.position.x < self.position.x < player.position.x + player.image.get_width() and player.position.y < self.position.y < player.position.y + player.image.get_height()
+
 class Debug: # debugging shit
 	enabled = True
 	font = pygame.font.SysFont("arial.ttf", 24)
 	_row_offset_y = 0
+	_color = (255, 0, 0)
 
 	def new_frame():
 		Debug._row_offset_y = 0
 
 	def draw_info(surface, text):
 		fw, fh = Debug.font.size(text)
-		surface.blit(Debug.font.render(text, True, (255, 0, 0)), (0, Debug._row_offset_y))
+		surface.blit(Debug.font.render(text, True, Debug._color), (0, Debug._row_offset_y))
 		Debug._row_offset_y += fh
+
+	def draw_box(surface, box):
+		pygame.draw.rect(surface, Debug._color, box, 1)
 
 game = Game()
 
@@ -175,8 +187,14 @@ while running:
 	for entity in game.get_all_entities():
 		entity.update()
 		entity.draw()
-		if entity.is_out_of_bounds([0, 0, WIDTH, HEIGHT]):
-			game.delete_entity(entity)
+		if entity.type == Entity.Type.PROJECTILE:
+			if entity.is_out_of_bounds([0, 0, WIDTH, HEIGHT]):
+				game.delete_entity(entity)
+			hitter = game.get_player_by_id(entity.owner_id)
+			target = game.get_player_by_id((entity.owner_id + 1) if (entity.owner_id == 1) else (entity.owner_id - 1))
+			if entity.does_collide_with_player(target):
+				print(f"Player {hitter.id} hit Player {target.id}")
+				game.delete_entity(entity)
 
 	if Debug.enabled: # debugging shit
 		Debug.new_frame()
@@ -184,6 +202,8 @@ while running:
 		Debug.draw_info(surface, f"FT (DT): {round(clock.get_time())}ms")
 		Debug.draw_info(surface, f"FCT: {round(clock.get_rawtime())}ms")
 		Debug.draw_info(surface, f"EC: {len(game._entities)}")
+		for entity in game.get_all_entities():
+			Debug.draw_box(surface, (*entity.position, entity.image.get_width(), entity.image.get_height()))
 	
 	pygame.display.update()
 	surface.fill((255, 255, 255))
