@@ -78,6 +78,7 @@ class Player1(pygame.sprite.Sprite):
 					timelastfireforplayer2 = time.time()
 					updateposbulletlist=list(self.pos)
 					updateposbulletlist[0]=updateposbulletlist[0]-(BXSCALE/2)
+					updateposbulletlist[1]=updateposbulletlist[1]-(HSCALED)-(BYSCALE)
 					updateposbulletlist=tuple(updateposbulletlist)
 					pewpewpew.append(shootsprite(updateposbulletlist,False))
 
