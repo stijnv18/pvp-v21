@@ -187,7 +187,7 @@ class Projectile(Entity):
 		return not (r1x2 < r2x2 or r1y2 < r2y2 or r1x1 > r2x1 or r1y1 > r2y2)
 
 class Debug: # debugging shit
-	enabled = False
+	enabled = True
 	font = pygame.font.SysFont("arial.ttf", 24)
 	_row_offset_y = 0
 	_color = (255, 0, 0)
@@ -213,11 +213,11 @@ while running:
 
 	# TODO: convert naar match-case
 	pressed_keys = pygame.key.get_pressed()
-	if (pressed_keys[pygame.K_q and pygame.K_a]):
+	if (pressed_keys[pygame.K_q] or pressed_keys[pygame.K_a]):
 		game.player1.move_left()
 	if (pressed_keys[pygame.K_d]):
 		game.player1.move_right()
-	if (pressed_keys[pygame.K_z and pygame.K_w]):
+	if (pressed_keys[pygame.K_z] or pressed_keys[pygame.K_w]):
 		if (p := game.player1.request_projectile()) is not None:
 			game.append_entity(p)
 	if (pressed_keys[pygame.K_RIGHT]):
