@@ -10,9 +10,7 @@ laat heel de code opniew schrijven
 
 ## to doen:
 
-    - start menu
-    - death screen
-    - countdown voor start
+    - add networking voor remote multiplayer
 
 ## wat bij issues:
 
