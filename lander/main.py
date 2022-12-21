@@ -41,22 +41,56 @@ class Images:
 	healthbar_bad = pygame.transform.scale(pygame.image.load(r"./images/healthbar_bad.png"), (HEALTHBAR_BAD_WIDTH_SCALED, HEALTHBAR_BAD_HEIGHT_SCALED))
 	healthbar_hearth = pygame.transform.scale(pygame.image.load(r"./images/healthbar_hearth.png"), (HEALTHBAR_HEARTH_WIDTH_SCALED, HEALTHBAR_HEARTH_HEIGHT_SCALED))
 	healthbar_hearth_flipped = pygame.transform.flip(healthbar_hearth, True, True)
-	countdown_3 = pygame.image.load(r"./images/countdown_3.png")
-	countdown_2 = pygame.image.load(r"./images/countdown_2.png")
-	countdown_1 = pygame.image.load(r"./images/countdown_1.png")
+	countdown_3 = pygame.transform.scale(pygame.image.load(r"./images/countdown_3.png"), (198, 120))
+	countdown_2 = pygame.transform.scale(pygame.image.load(r"./images/countdown_2.png"), (198, 120))
+	countdown_1 = pygame.transform.scale(pygame.image.load(r"./images/countdown_1.png"), (198, 120))
+	restart = pygame.transform.scale(pygame.image.load(r"./images/restart.png"), (280, 34))
 	player_1 = pygame.transform.scale(pygame.image.load(r"./images/player_1.png"), (WIDTH_SCALED, HEIGHT_SCALED))
 	player_2 = pygame.transform.scale(pygame.image.load(r"./images/player_2.png"), (WIDTH_SCALED, HEIGHT_SCALED))
 	projectile_1 = pygame.transform.scale(pygame.image.load(r"./images/projectile_1.png"), (PROJECTILE_WIDTH_SCALED, PROJECTILE_HEIGHT_SCALED))
 	projectile_2 = pygame.transform.scale(pygame.image.load(r"./images/projectile_2.png"), (PROJECTILE_WIDTH_SCALED, PROJECTILE_HEIGHT_SCALED))
 
 class Game:
+	class State:
+		MAINMENU = 0
+		COUNTDOWN = 1
+		PLAYING = 2
+		RESTART = 3
+
 	def __init__(self):
+		self.state = Game.State.MAINMENU
 		self.player1 = Player(1)
 		self.player2 = Player(2)
 		self._entities = [self.player1, self.player2]
+		self._countdown = 0
 
-	def draw(self):
+	def start_countdown(self):
+		self.state = Game.State.COUNTDOWN
+		self._countdown = pygame.time.get_ticks() - 1000
+
+	def draw_background(self):
 		surface.blit(Images.background, (0, 0))
+
+	def draw_darker_overlay(self):
+		s = pygame.Surface((WIDTH, HEIGHT))
+		s.fill((0, 0, 0))
+		s.set_alpha(127)
+		surface.blit(s, (0, 0))
+
+	def process_gamestate(self):
+		if self.state != Game.State.PLAYING:
+			self.draw_darker_overlay()
+		if self.state == Game.State.RESTART:
+			surface.blit(Images.restart, ((WIDTH - Images.restart.get_width()) // 2, (HEIGHT - Images.restart.get_height()) // 2))
+		elif self.state == Game.State.COUNTDOWN:
+			if self._countdown + 4000 < pygame.time.get_ticks():
+				self.state = Game.State.PLAYING
+			elif self._countdown + 3000 < pygame.time.get_ticks():
+				surface.blit(Images.countdown_1, ((WIDTH - Images.countdown_1.get_width()) // 2, (HEIGHT - Images.countdown_1.get_height()) // 2))
+			elif self._countdown + 2000 < pygame.time.get_ticks():
+				surface.blit(Images.countdown_2, ((WIDTH - Images.countdown_2.get_width()) // 2, (HEIGHT - Images.countdown_2.get_height()) // 2))
+			elif self._countdown + 1000 < pygame.time.get_ticks():
+				surface.blit(Images.countdown_3, ((WIDTH - Images.countdown_3.get_width()) // 2, (HEIGHT - Images.countdown_3.get_height()) // 2))
 
 	def get_player_by_id(self, id):
 		for e in self.get_all_entities_of_type(Entity.Type.PLAYER):
@@ -131,6 +165,13 @@ class Player(Entity):
 			return projectile
 		else:
 			return None
+
+	def take_damage(self, amount):
+		self.health -= amount
+		if self.health <= 0:
+			self.health = 0
+			return True
+		return False
 
 	def draw(self):
 		super().draw()
@@ -210,27 +251,37 @@ while running:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			running = False
+		if event.type == pygame.KEYDOWN:
+			if game.state == Game.State.RESTART:
+				if event.key == pygame.K_r:
+					game = Game()
+
+	if game.state == Game.State.MAINMENU:
+		# TODO: add main menu, on start: game.start_countdown()
+		game.start_countdown()
 
 	# TODO: convert naar match-case
 	pressed_keys = pygame.key.get_pressed()
-	if (pressed_keys[pygame.K_q] or pressed_keys[pygame.K_a]):
-		game.player1.move_left()
-	if (pressed_keys[pygame.K_d]):
-		game.player1.move_right()
-	if (pressed_keys[pygame.K_z] or pressed_keys[pygame.K_w]):
-		if (p := game.player1.request_projectile()) is not None:
-			game.append_entity(p)
-	if (pressed_keys[pygame.K_RIGHT]):
-		game.player2.move_left()
-	if (pressed_keys[pygame.K_LEFT]):
-		game.player2.move_right()
-	if (pressed_keys[pygame.K_UP]):
-		if (p := game.player2.request_projectile()) is not None:
-			game.append_entity(p)
+	if game.state == Game.State.PLAYING:
+		if (pressed_keys[pygame.K_q] or pressed_keys[pygame.K_a]):
+			game.player1.move_left()
+		if (pressed_keys[pygame.K_d]):
+			game.player1.move_right()
+		if (pressed_keys[pygame.K_z] or pressed_keys[pygame.K_w]):
+			if (p := game.player1.request_projectile()) is not None:
+				game.append_entity(p)
+		if (pressed_keys[pygame.K_RIGHT]):
+			game.player2.move_left()
+		if (pressed_keys[pygame.K_LEFT]):
+			game.player2.move_right()
+		if (pressed_keys[pygame.K_UP]):
+			if (p := game.player2.request_projectile()) is not None:
+				game.append_entity(p)
 
-	game.draw()
+	game.draw_background()
 	for entity in game.get_all_entities():
-		entity.update()
+		if game.state == Game.State.PLAYING:
+			entity.update()
 		entity.draw()
 		if entity.type == Entity.Type.PROJECTILE:
 			if entity.is_out_of_bounds([0, 0, WIDTH, HEIGHT]):
@@ -239,8 +290,10 @@ while running:
 			target = game.get_player_by_id(3 - entity.owner_id)
 			if entity.does_collide_with_player(target):
 				print(f"Player {hitter.id} hit Player {target.id}")
-				target.health -= 1
+				if target.take_damage(1):
+					game.state = Game.State.RESTART
 				game.delete_entity(entity)
+	game.process_gamestate()
 
 	if Debug.enabled: # debugging shit
 		Debug.new_frame()
