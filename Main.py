@@ -36,6 +36,14 @@ surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Game")
 pygame.display.set_icon(pygame.image.load(r"./images/icon.png"))
 
+class Controls:
+	P1_LEFT = 4
+	P1_RIGHT = 7
+	P1_SHOOT = 26
+	P2_LEFT = 80
+	P2_RIGHT = 79
+	P2_SHOOT = 82
+
 class Images:
 	mainmenu = pygame.transform.scale(pygame.image.load(r"./images/mainmenu.png"), (WIDTH, HEIGHT))
 	background = pygame.transform.scale(pygame.image.load(r"./images/background.png"), (WIDTH, HEIGHT))
@@ -250,38 +258,42 @@ class Debug: # debugging shit
 		pygame.draw.rect(surface, Debug._color, box, 1)
 
 game = Game()
+pressed_keys = [] # TODO: gebruik unicode ipv scancode?
 
 running = True
 while running:
 	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			running = False
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_r:
-				if game.state == Game.State.RESTART:
-					game = Game()
-					game.start_countdown()
-			if event.key == pygame.K_SPACE:
-				if game.state == Game.State.MAINMENU:
-					game.start_countdown()
-			if event.key == pygame.K_F3:
-				Debug.enabled = not Debug.enabled
+		match event.type:
+			case pygame.QUIT:
+				running = False
+			case pygame.KEYDOWN:
+				pressed_keys.append(event.scancode)
+				if event.key == pygame.K_r:
+					if game.state == Game.State.RESTART:
+						game = Game()
+						game.start_countdown()
+				if event.key == pygame.K_SPACE:
+					if game.state == Game.State.MAINMENU:
+						game.start_countdown()
+				if event.key == pygame.K_F3:
+					Debug.enabled = not Debug.enabled
+			case pygame.KEYUP:
+				pressed_keys.remove(event.scancode)
 
 	# TODO: convert naar match-case
-	pressed_keys = pygame.key.get_pressed()
 	if game.state == Game.State.PLAYING:
-		if (pressed_keys[pygame.K_q] or pressed_keys[pygame.K_a]):
+		if Controls.P1_LEFT in pressed_keys:
 			game.player1.move_left()
-		if (pressed_keys[pygame.K_d]):
+		if Controls.P1_RIGHT in pressed_keys:
 			game.player1.move_right()
-		if (pressed_keys[pygame.K_z] or pressed_keys[pygame.K_w]):
+		if Controls.P1_SHOOT in pressed_keys:
 			if (p := game.player1.request_projectile()) is not None:
 				game.append_entity(p)
-		if (pressed_keys[pygame.K_RIGHT]):
+		if Controls.P2_LEFT in pressed_keys:
 			game.player2.move_left()
-		if (pressed_keys[pygame.K_LEFT]):
+		if Controls.P2_RIGHT in pressed_keys:
 			game.player2.move_right()
-		if (pressed_keys[pygame.K_UP]):
+		if Controls.P2_SHOOT in pressed_keys:
 			if (p := game.player2.request_projectile()) is not None:
 				game.append_entity(p)
 
