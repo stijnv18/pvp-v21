@@ -133,9 +133,11 @@ class Entity:
 		self.position = position
 		self.velocity = velocity if velocity is not None else pygame.math.Vector2(0, 0)
 		self.acceleration = acceleration if acceleration is not None else pygame.math.Vector2(0, 0)
+		self.visible = True
 
 	def draw(self):
-		surface.blit(self.image, self.position)
+		if self.visible:
+			surface.blit(self.image, self.position)
 
 	def update(self):
 		pass
