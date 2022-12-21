@@ -30,6 +30,7 @@ PROJECTILE_VELOCITY = 15
 PLAYER_PROJECTILE_DELAY = 500
 PLAYER_ACCELERATION = 0.5
 PLAYER_FRICTION = 0.12
+FPS = 60
 
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Game")
@@ -313,7 +314,7 @@ while running:
 	
 	pygame.display.update()
 	surface.fill((0, 0, 0))
-	deltatime = clock.tick(60)
+	deltatime = clock.tick(FPS)
 
 pygame.display.quit()
 pygame.quit()
