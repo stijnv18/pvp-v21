@@ -1,3 +1,6 @@
+# TODO: use deltatime
+# TODO: 
+
 import pygame
 import sys
 
@@ -9,13 +12,18 @@ pygame.display.init()
 
 clock = pygame.time.Clock()
 
-# TODO: delete garbage global variables
+# TODO: delete garbage global scaling variables bullshit
 WIDTH = 800
 HEIGHT = 800
 WIDTH_SCALED = 36 / 400 * WIDTH
 HEIGHT_SCALED = 27 / 450 * HEIGHT
-HEALTHBAR_WIDTH_SCALED = 64 / 192 * WIDTH * 0.7
-HEALTHBAR_HEIGHT_SCALED = 9 / 192 * HEIGHT * 0.7
+HEALTHBAR_FULL_WIDTH_SCALED = 64 / 192 * WIDTH * 0.7
+HEALTHBAR_FULL_HEIGHT_SCALED = 9 / 192 * HEIGHT * 0.7
+HEALTHBAR_BAD_WIDTH_SCALED = 6 / 192 * WIDTH * 0.7
+HEALTHBAR_BAD_HEIGHT_SCALED = HEALTHBAR_FULL_HEIGHT_SCALED
+HEALTHBAR_FUCKING_BLACK_PIXEL_WIDTH_OR_SOMETHING_SCALED = 3
+HEALTHBAR_HEARTH_WIDTH_SCALED = 30
+HEALTHBAR_HEARTH_HEIGHT_SCALED = 27
 PROJECTILE_WIDTH_SCALED = 8 / 400 * WIDTH
 PROJECTILE_HEIGHT_SCALED = 15 / 450 * HEIGHT
 PROJECTILE_VELOCITY = 15
@@ -29,10 +37,10 @@ pygame.display.set_icon(pygame.image.load(r"./images/icon.png"))
 
 class Images:
 	background = pygame.transform.scale(pygame.image.load(r"./images/background.png"), (WIDTH, HEIGHT))
-	healthbar = pygame.transform.scale(pygame.image.load(r"./images/healthbar.png"), (HEALTHBAR_WIDTH_SCALED, HEALTHBAR_HEIGHT_SCALED))
-	healthbar_flipped = pygame.transform.scale(pygame.transform.flip(healthbar, True, True), (HEALTHBAR_WIDTH_SCALED, HEALTHBAR_HEIGHT_SCALED))
-	badhealth = pygame.image.load(r"./images/badhealth.png")
-	badhealth_flipped = pygame.transform.flip(badhealth, True, True)
+	healthbar_full = pygame.transform.scale(pygame.image.load(r"./images/healthbar_full.png"), (HEALTHBAR_FULL_WIDTH_SCALED, HEALTHBAR_FULL_HEIGHT_SCALED))
+	healthbar_bad = pygame.transform.scale(pygame.image.load(r"./images/healthbar_bad.png"), (HEALTHBAR_BAD_WIDTH_SCALED, HEALTHBAR_BAD_HEIGHT_SCALED))
+	healthbar_hearth = pygame.transform.scale(pygame.image.load(r"./images/healthbar_hearth.png"), (HEALTHBAR_HEARTH_WIDTH_SCALED, HEALTHBAR_HEARTH_HEIGHT_SCALED))
+	healthbar_hearth_flipped = pygame.transform.flip(healthbar_hearth, True, True)
 	countdown_3 = pygame.image.load(r"./images/countdown_3.png")
 	countdown_2 = pygame.image.load(r"./images/countdown_2.png")
 	countdown_1 = pygame.image.load(r"./images/countdown_1.png")
@@ -46,6 +54,9 @@ class Game:
 		self.player1 = Player(1)
 		self.player2 = Player(2)
 		self._entities = [self.player1, self.player2]
+
+	def draw(self):
+		surface.blit(Images.background, (0, 0))
 
 	def get_player_by_id(self, id):
 		for e in self.get_all_entities_of_type(Entity.Type.PLAYER):
@@ -86,6 +97,8 @@ class Player(Entity):
 	def __init__(self, id):
 		self.id = id
 		self.last_projectile = 0
+		self.max_health = 13
+		self.health = 13
 		image = getattr(Images, f"player_{self.id}")
 		position = pygame.math.Vector2(((WIDTH - image.get_width()) // 2, (35 if id == 2 else HEIGHT - image.get_height() - 35)))
 		super().__init__(Entity.Type.PLAYER, image, position)
@@ -119,6 +132,33 @@ class Player(Entity):
 		else:
 			return None
 
+	def draw(self):
+		super().draw()
+		if self.id == 1:
+			wm = Images.healthbar_hearth.get_width() + 5 + Images.healthbar_full.get_width()
+			hp = max(Images.healthbar_full.get_height(), Images.healthbar_hearth.get_height())
+			hm = min(Images.healthbar_full.get_height(), Images.healthbar_hearth.get_height())
+			xl = (WIDTH - wm) // 2
+			xr = xl + Images.healthbar_hearth.get_width() + 5
+			yp = HEIGHT - hp - 5
+			ym = yp + (hp - hm) // 2
+			surface.blit(Images.healthbar_hearth, (xl, ym))
+			surface.blit(Images.healthbar_full, (xr, yp))
+			for i in range(self.health, self.max_health):
+				surface.blit(Images.healthbar_bad, (xr + (Images.healthbar_bad.get_width() * i - HEALTHBAR_FUCKING_BLACK_PIXEL_WIDTH_OR_SOMETHING_SCALED * i), yp))
+		elif self.id == 2:
+			wm = Images.healthbar_full.get_width() + 5 + Images.healthbar_hearth_flipped.get_width()
+			hp = max(Images.healthbar_full.get_height(), Images.healthbar_hearth_flipped.get_height())
+			hm = min(Images.healthbar_full.get_height(), Images.healthbar_hearth_flipped.get_height())
+			xl = (WIDTH - wm) // 2
+			xr = xl + Images.healthbar_full.get_width() + 5
+			yp = 5
+			ym = yp + (hp - hm) // 2
+			surface.blit(Images.healthbar_full, (xl, ym))
+			surface.blit(Images.healthbar_hearth_flipped, (xr, yp))
+			for i in range(self.max_health - self.health):
+				surface.blit(Images.healthbar_bad, (xl + (Images.healthbar_bad.get_width() * i - HEALTHBAR_FUCKING_BLACK_PIXEL_WIDTH_OR_SOMETHING_SCALED * i), yp))
+
 class Projectile(Entity):
 	def __init__(self, owner_id, position, velocity):
 		self.owner_id = owner_id
@@ -135,7 +175,16 @@ class Projectile(Entity):
 			game.delete_entity(self)
 
 	def does_collide_with_player(self, player):
-		return player.position.x < self.position.x < player.position.x + player.image.get_width() and player.position.y < self.position.y < player.position.y + player.image.get_height()
+		# TODO: fix when deltatime is low: use raytracing
+		r1x1 = self.position.x
+		r1x2 = self.position.x + self.image.get_width()
+		r1y1 = self.position.y
+		r1y2 = self.position.y + self.image.get_height()
+		r2x1 = player.position.x + player.image.get_width()
+		r2x2 = player.position.x
+		r2y1 = player.position.y + player.image.get_height()
+		r2y2 = player.position.y
+		return not (r1x2 < r2x2 or r1y2 < r2y2 or r1x1 > r2x1 or r1y1 > r2y2)
 
 class Debug: # debugging shit
 	enabled = True
@@ -179,11 +228,7 @@ while running:
 		if (p := game.player2.request_projectile()) is not None:
 			game.append_entity(p)
 
-	surface.blit(Images.background, (0, 0))
-
-	surface.blit(Images.healthbar_flipped, ((WIDTH - Images.healthbar_flipped.get_width()) // 2, 5))
-	surface.blit(Images.healthbar, ((WIDTH - Images.healthbar.get_width()) // 2, HEIGHT - Images.healthbar.get_height() - 5))
-
+	game.draw()
 	for entity in game.get_all_entities():
 		entity.update()
 		entity.draw()
@@ -191,9 +236,10 @@ while running:
 			if entity.is_out_of_bounds([0, 0, WIDTH, HEIGHT]):
 				game.delete_entity(entity)
 			hitter = game.get_player_by_id(entity.owner_id)
-			target = game.get_player_by_id((entity.owner_id + 1) if (entity.owner_id == 1) else (entity.owner_id - 1))
+			target = game.get_player_by_id(3 - entity.owner_id)
 			if entity.does_collide_with_player(target):
 				print(f"Player {hitter.id} hit Player {target.id}")
+				target.health -= 1
 				game.delete_entity(entity)
 
 	if Debug.enabled: # debugging shit
@@ -202,11 +248,12 @@ while running:
 		Debug.draw_info(surface, f"FT (DT): {round(clock.get_time())}ms")
 		Debug.draw_info(surface, f"FCT: {round(clock.get_rawtime())}ms")
 		Debug.draw_info(surface, f"EC: {len(game._entities)}")
+		Debug.draw_info(surface, f"MP: {pygame.mouse.get_pos()}")
 		for entity in game.get_all_entities():
 			Debug.draw_box(surface, (*entity.position, entity.image.get_width(), entity.image.get_height()))
 	
 	pygame.display.update()
-	surface.fill((255, 255, 255))
+	surface.fill((0, 0, 0))
 	deltatime = clock.tick(60)
 
 pygame.display.quit()
