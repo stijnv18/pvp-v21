@@ -252,9 +252,11 @@ while running:
 		if event.type == pygame.QUIT:
 			running = False
 		if event.type == pygame.KEYDOWN:
-			if game.state == Game.State.RESTART:
-				if event.key == pygame.K_r:
+			if event.key == pygame.K_r:
+				if game.state == Game.State.RESTART:
 					game = Game()
+			if event.key == pygame.K_F3:
+				Debug.enabled = not Debug.enabled
 
 	if game.state == Game.State.MAINMENU:
 		# TODO: add main menu, on start: game.start_countdown()
@@ -289,7 +291,6 @@ while running:
 			hitter = game.get_player_by_id(entity.owner_id)
 			target = game.get_player_by_id(3 - entity.owner_id)
 			if entity.does_collide_with_player(target):
-				print(f"Player {hitter.id} hit Player {target.id}")
 				if target.take_damage(1):
 					game.state = Game.State.RESTART
 				game.delete_entity(entity)
