@@ -33,7 +33,7 @@ PLAYER_FRICTION = 0.12
 FPS = 60
 
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Game")
+pygame.display.set_caption("CrapGame")
 pygame.display.set_icon(pygame.image.load(r"./images/icon.png"))
 
 class Controls:
@@ -110,13 +110,13 @@ class Game:
 			if e.id == id:
 				return e
 
+	def get_all_entities_of_type(self, type):
+		return [e for e in self.get_all_entities() if e.type == type]
+
 	def get_all_entities(self):
 		return self._entities
 
-	def get_all_entities_of_type(self, type):
-		return [e for e in self._entities if e.type == type]
-
-	def append_entity(self, entity):
+	def create_entity(self, entity):
 		self._entities.append(entity)
 
 	def delete_entity(self, entity):
@@ -288,14 +288,14 @@ while running:
 			game.player1.move_right()
 		if Controls.P1_SHOOT in pressed_keys:
 			if (p := game.player1.request_projectile()) is not None:
-				game.append_entity(p)
+				game.create_entity(p)
 		if Controls.P2_LEFT in pressed_keys:
 			game.player2.move_left()
 		if Controls.P2_RIGHT in pressed_keys:
 			game.player2.move_right()
 		if Controls.P2_SHOOT in pressed_keys:
 			if (p := game.player2.request_projectile()) is not None:
-				game.append_entity(p)
+				game.create_entity(p)
 
 	game.draw()
 	for entity in game.get_all_entities():
