@@ -82,11 +82,11 @@ class Game:
 		surface.blit(s, (0, 0))
 
 	def process_gamestate(self):
-		if self.state != Game.State.PLAYING:
-			self.draw_darker_overlay()
 		if self.state == Game.State.RESTART:
+			self.draw_darker_overlay()
 			surface.blit(Images.restart, ((WIDTH - Images.restart.get_width()) // 2, (HEIGHT - Images.restart.get_height()) // 2))
 		elif self.state == Game.State.COUNTDOWN:
+			self.draw_darker_overlay()
 			if self._countdown + 4000 < pygame.time.get_ticks():
 				self.state = Game.State.PLAYING
 			elif self._countdown + 3000 < pygame.time.get_ticks():
