@@ -36,6 +36,7 @@ pygame.display.set_caption("Game")
 pygame.display.set_icon(pygame.image.load(r"./images/icon.png"))
 
 class Images:
+	mainmenu = pygame.transform.scale(pygame.image.load(r"./images/mainmenu.png"), (WIDTH, HEIGHT))
 	background = pygame.transform.scale(pygame.image.load(r"./images/background.png"), (WIDTH, HEIGHT))
 	healthbar_full = pygame.transform.scale(pygame.image.load(r"./images/healthbar_full.png"), (HEALTHBAR_FULL_WIDTH_SCALED, HEALTHBAR_FULL_HEIGHT_SCALED))
 	healthbar_bad = pygame.transform.scale(pygame.image.load(r"./images/healthbar_bad.png"), (HEALTHBAR_BAD_WIDTH_SCALED, HEALTHBAR_BAD_HEIGHT_SCALED))
@@ -68,8 +69,11 @@ class Game:
 		self.state = Game.State.COUNTDOWN
 		self._countdown = pygame.time.get_ticks() - 1000
 
-	def draw_background(self):
-		surface.blit(Images.background, (0, 0))
+	def draw(self):
+		if (self.state == Game.State.MAINMENU):
+			surface.blit(Images.mainmenu, (0, 0))
+		else:
+			surface.blit(Images.background, (0, 0))
 
 	def draw_darker_overlay(self):
 		s = pygame.Surface((WIDTH, HEIGHT))
@@ -255,12 +259,12 @@ while running:
 			if event.key == pygame.K_r:
 				if game.state == Game.State.RESTART:
 					game = Game()
+					game.start_countdown()
+			if event.key == pygame.K_SPACE:
+				if game.state == Game.State.MAINMENU:
+					game.start_countdown()
 			if event.key == pygame.K_F3:
 				Debug.enabled = not Debug.enabled
-
-	if game.state == Game.State.MAINMENU:
-		# TODO: add main menu, on start: game.start_countdown()
-		game.start_countdown()
 
 	# TODO: convert naar match-case
 	pressed_keys = pygame.key.get_pressed()
@@ -280,11 +284,12 @@ while running:
 			if (p := game.player2.request_projectile()) is not None:
 				game.append_entity(p)
 
-	game.draw_background()
+	game.draw()
 	for entity in game.get_all_entities():
 		if game.state == Game.State.PLAYING:
 			entity.update()
-		entity.draw()
+		if game.state != Game.State.MAINMENU:
+			entity.draw()
 		if entity.type == Entity.Type.PROJECTILE:
 			if entity.is_out_of_bounds([0, 0, WIDTH, HEIGHT]):
 				game.delete_entity(entity)
