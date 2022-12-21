@@ -228,7 +228,7 @@ class Projectile(Entity):
 		return not (r1x2 < r2x2 or r1y2 < r2y2 or r1x1 > r2x1 or r1y1 > r2y2)
 
 class Debug: # debugging shit
-	enabled = True
+	enabled = False
 	font = pygame.font.SysFont("arial.ttf", 24)
 	_row_offset_y = 0
 	_color = (255, 0, 0)
