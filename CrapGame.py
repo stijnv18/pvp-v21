@@ -1,9 +1,8 @@
-# TODO: use deltatime
-# TODO: 
+import sys # built-in python module
+import pygame # pip install pygame
+import shapely.geometry.polygon # pip install shapely
 
-import pygame
-import sys
-
+# TODO: use deltatime for movement
 # TODO: if sys.platform != "win32": sys.exit(-1)
 
 # TODO: check return values voor errors
@@ -34,7 +33,7 @@ FPS = 60
 
 surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("CrapGame")
-pygame.display.set_icon(pygame.texture.load(r"./textures/icon.png"))
+pygame.display.set_icon(pygame.image.load(r"./textures/icon.png"))
 
 class Controls:
 	P1_LEFT = 4
@@ -45,20 +44,20 @@ class Controls:
 	P2_SHOOT = 82
 
 class Textures:
-	mainmenu = pygame.transform.scale(pygame.texture.load(r"./textures/mainmenu.png"), (WIDTH, HEIGHT))
-	background = pygame.transform.scale(pygame.texture.load(r"./textures/background.png"), (WIDTH, HEIGHT))
-	healthbar_full = pygame.transform.scale(pygame.texture.load(r"./textures/healthbar_full.png"), (HEALTHBAR_FULL_WIDTH_SCALED, HEALTHBAR_FULL_HEIGHT_SCALED))
-	healthbar_bad = pygame.transform.scale(pygame.texture.load(r"./textures/healthbar_bad.png"), (HEALTHBAR_BAD_WIDTH_SCALED, HEALTHBAR_BAD_HEIGHT_SCALED))
-	healthbar_hearth = pygame.transform.scale(pygame.texture.load(r"./textures/healthbar_hearth.png"), (HEALTHBAR_HEARTH_WIDTH_SCALED, HEALTHBAR_HEARTH_HEIGHT_SCALED))
+	mainmenu = pygame.transform.scale(pygame.image.load(r"./textures/mainmenu.png"), (WIDTH, HEIGHT))
+	background = pygame.transform.scale(pygame.image.load(r"./textures/background.png"), (WIDTH, HEIGHT))
+	healthbar_full = pygame.transform.scale(pygame.image.load(r"./textures/healthbar_full.png"), (HEALTHBAR_FULL_WIDTH_SCALED, HEALTHBAR_FULL_HEIGHT_SCALED))
+	healthbar_bad = pygame.transform.scale(pygame.image.load(r"./textures/healthbar_bad.png"), (HEALTHBAR_BAD_WIDTH_SCALED, HEALTHBAR_BAD_HEIGHT_SCALED))
+	healthbar_hearth = pygame.transform.scale(pygame.image.load(r"./textures/healthbar_hearth.png"), (HEALTHBAR_HEARTH_WIDTH_SCALED, HEALTHBAR_HEARTH_HEIGHT_SCALED))
 	healthbar_hearth_flipped = pygame.transform.flip(healthbar_hearth, True, True)
-	countdown_3 = pygame.transform.scale(pygame.texture.load(r"./textures/countdown_3.png"), (198, 120))
-	countdown_2 = pygame.transform.scale(pygame.texture.load(r"./textures/countdown_2.png"), (198, 120))
-	countdown_1 = pygame.transform.scale(pygame.texture.load(r"./textures/countdown_1.png"), (198, 120))
-	restart = pygame.transform.scale(pygame.texture.load(r"./textures/restart.png"), (280, 34))
-	player_1 = pygame.transform.scale(pygame.texture.load(r"./textures/player_1.png"), (WIDTH_SCALED, HEIGHT_SCALED))
-	player_2 = pygame.transform.scale(pygame.texture.load(r"./textures/player_2.png"), (WIDTH_SCALED, HEIGHT_SCALED))
-	projectile_1 = pygame.transform.scale(pygame.texture.load(r"./textures/projectile_1.png"), (PROJECTILE_WIDTH_SCALED, PROJECTILE_HEIGHT_SCALED))
-	projectile_2 = pygame.transform.scale(pygame.texture.load(r"./textures/projectile_2.png"), (PROJECTILE_WIDTH_SCALED, PROJECTILE_HEIGHT_SCALED))
+	countdown_3 = pygame.transform.scale(pygame.image.load(r"./textures/countdown_3.png"), (198, 120))
+	countdown_2 = pygame.transform.scale(pygame.image.load(r"./textures/countdown_2.png"), (198, 120))
+	countdown_1 = pygame.transform.scale(pygame.image.load(r"./textures/countdown_1.png"), (198, 120))
+	restart = pygame.transform.scale(pygame.image.load(r"./textures/restart.png"), (280, 34))
+	player_1 = pygame.transform.scale(pygame.image.load(r"./textures/player_1.png"), (WIDTH_SCALED, HEIGHT_SCALED))
+	player_2 = pygame.transform.scale(pygame.image.load(r"./textures/player_2.png"), (WIDTH_SCALED, HEIGHT_SCALED))
+	projectile_1 = pygame.transform.scale(pygame.image.load(r"./textures/projectile_1.png"), (PROJECTILE_WIDTH_SCALED, PROJECTILE_HEIGHT_SCALED))
+	projectile_2 = pygame.transform.scale(pygame.image.load(r"./textures/projectile_2.png"), (PROJECTILE_WIDTH_SCALED, PROJECTILE_HEIGHT_SCALED))
 
 class Game:
 	class State:
@@ -127,10 +126,11 @@ class Entity:
 		PLAYER = 0
 		PROJECTILE = 1
 
-	def __init__(self, type, texture, position, velocity=None, acceleration=None):
+	def __init__(self, type, texture, position, hitbox, velocity=None, acceleration=None):
 		self.type = type
 		self.texture = texture
 		self.position = position
+		self.hitbox = hitbox
 		self.velocity = velocity if velocity is not None else pygame.math.Vector2(0, 0)
 		self.acceleration = acceleration if acceleration is not None else pygame.math.Vector2(0, 0)
 		self.visible = True
@@ -140,22 +140,9 @@ class Entity:
 			surface.blit(self.texture, self.position)
 
 	def does_collide_with(self, entity):
-		position = (0, 0)
-		hitbox = ((0, 0), (0, 3), (3, 3), (3, 0))
-		"""
-			0	1	2	3	4	5	6	7	8	9
-		0	X	X	X							
-		1	X	X	X							
-		2	X	X	X							
-		3										
-		4										
-		5										
-		6										
-		7										
-		8										
-		9										
-		"""
-		pass
+		p1 = shapely.geometry.polygon.Polygon(tuple(map(lambda p: tuple(map(lambda a, b: a + b, p, self.position)), self.hitbox)))
+		p2 = shapely.geometry.polygon.Polygon(tuple(map(lambda p: tuple(map(lambda a, b: a + b, p, entity.position)), entity.hitbox)))
+		return p1.overlaps(p2)
 
 	def update(self):
 		pass
@@ -168,7 +155,7 @@ class Player(Entity):
 		self.health = 13
 		texture = getattr(Textures, f"player_{self.id}")
 		position = pygame.math.Vector2(((WIDTH - texture.get_width()) // 2, (35 if id == 2 else HEIGHT - texture.get_height() - 35)))
-		super().__init__(Entity.Type.PLAYER, texture, position)
+		super().__init__(Entity.Type.PLAYER, texture, position, ((0, 0), (texture.get_width(), 0), (texture.get_width(), texture.get_height()), (0, texture.get_height())))
 
 	def update(self):
 		self.acceleration.x += self.velocity.x * -PLAYER_FRICTION
@@ -238,7 +225,7 @@ class Projectile(Entity):
 		self.owner_id = owner_id
 		self.texture = getattr(Textures, f"projectile_{self.owner_id}")
 		position.x -= self.texture.get_width() // 2
-		super().__init__(Entity.Type.PROJECTILE, self.texture, position, velocity)
+		super().__init__(Entity.Type.PROJECTILE, self.texture, position, ((0, 0), (self.texture.get_width(), 0), (self.texture.get_width(), self.texture.get_height()), (0, self.texture.get_height())), velocity)
 
 	def update(self):
 		self.position += self.velocity
@@ -247,18 +234,6 @@ class Projectile(Entity):
 		x1, y1, x2, y2 = bounds
 		if not (x1 < self.position.x < x2 and y1 < self.position.y < y2):
 			game.delete_entity(self)
-
-	def does_collide_with_player(self, player):
-		# TODO: fix when deltatime is low: use raytracing
-		r1x1 = self.position.x
-		r1x2 = self.position.x + self.texture.get_width()
-		r1y1 = self.position.y
-		r1y2 = self.position.y + self.texture.get_height()
-		r2x1 = player.position.x + player.texture.get_width()
-		r2x2 = player.position.x
-		r2y1 = player.position.y + player.texture.get_height()
-		r2y2 = player.position.y
-		return not (r1x2 < r2x2 or r1y2 < r2y2 or r1x1 > r2x1 or r1y1 > r2y2)
 
 class Debug: # debugging shit
 	enabled = False
@@ -326,9 +301,8 @@ while running:
 		if entity.type == Entity.Type.PROJECTILE:
 			if entity.is_out_of_bounds([0, 0, WIDTH, HEIGHT]):
 				game.delete_entity(entity)
-			hitter = game.get_player_by_id(entity.owner_id)
 			target = game.get_player_by_id(3 - entity.owner_id)
-			if entity.does_collide_with_player(target):
+			if entity.does_collide_with(target):
 				if target.take_damage(1):
 					game.state = Game.State.RESTART
 				game.delete_entity(entity)
@@ -343,7 +317,7 @@ while running:
 		Debug.draw_info(surface, f"MP: {pygame.mouse.get_pos()}")
 		for entity in game.get_all_entities():
 			Debug.draw_box(surface, (*entity.position, entity.texture.get_width(), entity.texture.get_height()))
-	
+
 	pygame.display.update()
 	surface.fill((0, 0, 0))
 	deltatime = clock.tick(FPS)
